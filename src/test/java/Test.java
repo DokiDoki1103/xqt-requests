@@ -1,15 +1,31 @@
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import com.xqt360.requests.config.RequestConfig;
 import com.xqt360.requests.config.RetryConfig;
 import com.xqt360.requests.http.Requests;
 import com.xqt360.requests.http.impl.HttpClientRequests;
+import com.xqt360.requests.http.impl.JsoupRequests;
+import com.xqt360.requests.interceptors.RequestInterceptor;
+import com.xqt360.requests.retry.RetryByBody;
+import com.xqt360.requests.retry.RetryByHttpResponse;
+import com.xqt360.requests.retry.RetryByJsoupResponse;
 import com.xqt360.requests.retry.RetryByStatus;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.math.BigDecimal;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class Test {
@@ -31,25 +47,121 @@ public class Test {
 
 
         Requests requests = new HttpClientRequests();
+
+        //创建 HttpClient，使用HttpClient发送请求
+        Requests requests1 = new HttpClientRequests();
+        Requests requests2 = new HttpClientRequests(true, "127.0.0.1:8888");
+        Requests requests3 = new HttpClientRequests(false, "127.0.0.1:8888", "username", "password");
+
+        //创建 JsoupRequests，使用Jsoup发送请求
+        Requests requests4 = new JsoupRequests();
+        Requests requests5 = new JsoupRequests("127.0.0.1:8888");
+        Requests requests6 = new JsoupRequests("127.0.0.1:8888", "username", "password");
+
+        String data1 = requests.get("https://baidu.com");
+        JSONObject jsonObject1 = requests.get("https://baidu.com", JSONObject.class);
+        Document document = requests.get("https://baidu.com", Document.class);
+
+        Connection.Response response = requests.get("https://baidu.com", Connection.Response.class);
+        HttpResponse httpResponse = requests.get("https://baidu.com", HttpResponse.class);
+
+        String data2 = requests.post("https://baidu.com", "a=1&b=2");
+        String data6 = requests.post("https://baidu.com", "{\"username\": \"zhang\"}");
+
+        Map<String, String> map = new HashMap<>();
+        map.put("a", "1");
+        map.put("b", "2");
+        String data3 = requests.post("https://baidu.com", map);
+
+
+        JSONObject jsonObject3 = new JSONObject();
+        jsonObject3.put("username", "zhang");
+        String data4 = requests.post("https://baidu.com", jsonObject3);
+
+
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.add(jsonObject3);
+        String data5 = requests.post("https://baidu.com", jsonArray);
+
+
+        List<NameValuePair> nameValuePairs = new ArrayList<>();
+        nameValuePairs.add(new BasicNameValuePair("username", "root"));
+        nameValuePairs.add(new BasicNameValuePair("password", "123456"));
+
+        String data7 = requests.post("https://baidu.com", nameValuePairs);
+
+        List<String> strings = new ArrayList<>();
+        strings.add("username=root");
+        strings.add("password=123456");
+        String data8 = requests.post("https://baidu.com", strings);
+
+
+        JSONObject jsonObject = requests.get("https://baidu.com?a=1&b=2", JSONObject.class);
 //      requests.setProxyIp("127.0.0.1:8866");
 
-//        requests.setRequestInterceptor(new RequestInterceptor() {
+//        RequestInterceptor requestInterceptor = new RequestInterceptor() {
 //            @Override
 //            public void use(RequestConfig requestConfig) {
-//                if (requestConfig.getUrl().equals("https://passport2-api.chaoxing.com/v11/loginregister?cx_xxt_passport=json")){
-//                    requestConfig.setData("uname=17531309659&code=8221314933z");
+//                //一些公用的请求头自动帮您设置无需每个请求再次单独设置
+//                requestConfig.addHeader("name1","value1");
+//                requestConfig.addHeader("name2","value2");
+//
+//                //某些url需要为其单独的设置代理IP
+//                if (requestConfig.getUrl().contains("needProxy")) {
+//                    requestConfig.setProxy(new Proxy(Proxy.Type.HTTP,new InetSocketAddress("127.0.0.1",8000)));
+//                }
+//                //某些url在请求之前还需要再次请求自己的服务器拿到一个加密Cookie
+//                if (requestConfig.getUrl().contains("needEncryptCookie")){
+//                    requestConfig.addCookie("name","value");
+//                }
+//
+//                //某些url的请求body被加密了，但是无法用java还原，还需要调用第三方接口获取加密结果
+//                if (requestConfig.getUrl().contains("needEncryptData")){
+//                    //前往第三方接口获取加密结果,直接设置，对代码0侵入，如果后期需要变动直接在此变动
+//                    requestConfig.setData(getEncrypt(requestConfig.getData()));
+//                }
+//                //把某些接口的https改为http
+//                if (requestConfig.getUrl().contains("noHttps")){
+//                    requestConfig.setUrl(requestConfig.getUrl().replace("https","http"));
+//                }
+//
+//                //某些域名用了第三方服务提供商提供的安全网络 封控的很严格，各种跳验证，
+//                // 这时候可以直接朔源找到对方真实IP直接对其IP发送请求，在不改一句代码的情况下，轻松完成此工作
+//                if (requestConfig.getUrl().contains("host")){//某些host下
+//                    String ipUrl = convertDomainToIP(requestConfig.getUrl(), "127.0.0.1");
+//                    requestConfig.setUrl(ipUrl);
+//                    requestConfig.addHeader("Host",domain);
+//                }
+//
+//
+//                //某些接口需要响应时间长一点，或者各种自定义化需求，等等全部可以拦截requestConfig来修改
+//                if (requestConfig.getUrl().contains("xxxx")){
+//                    //修改重试配置
+//                    requestConfig.setRetryConfig();
+//                    //让这个接口的超时时间变长
+//                    requestConfig.setTimeout();
+//                    //把这个接口的ua改变了
+//                    requestConfig.setUserAgent();
+//                    //等等更多的自定义配置requestConfig....应有尽有，期待您的发现
+//                    requestConfig.setCookies();
+//                    requestConfig.setMethod();
+//                    requestConfig.setFollowRedirects();
+//
 //                }
 //            }
-//        });
+//        };
 
+        RequestConfig<Object> objectRequestConfig = new RequestConfig<>();
+//        objectRequestConfig.setRetryConfig();
+//req
         String login = requests.post(
                 "https://passport2-api.chaoxing.com/v11/loginregister?cx_xxt_passport=json",
                 "uname=17531309659&code=8221314933z");
 
         System.out.println("发送字符串表单请求示例1" + login);
 
-        JSONObject jsonObject = requests.get("https://mooc1-api.chaoxing.com/mycourse/backclazzdata", JSONObject.class);
-        System.out.println(jsonObject);
+//        JSONObject jsonObject = requests.get("https://mooc1-api.chaoxing.com/mycourse/backclazzdata", JSONObject.class);
+//        System.out.println(jsonObject);
 //        JSONPath.paths()
 
 
@@ -63,9 +175,7 @@ public class Test {
 //        System.out.println("发送Map表单请求示例2" + login2);
 //
 //
-//        ArrayList<NameValuePair> nameValuePairs = new ArrayList<>();
-//        nameValuePairs.add(new BasicNameValuePair("uname","17531309659"));
-//        nameValuePairs.add(new BasicNameValuePair("code","8221314933z"));
+
 //
 //        Document login3 = requests.post("https://passport2-api.chaoxing.com/v11/loginregister?cx_xxt_passport=json", nameValuePairs, Document.class);
 //
@@ -110,28 +220,47 @@ public class Test {
 //         * 通过构建RequestConfig请求
 //         */
         RequestConfig<String> config = new RequestConfig<>();
-        RetryByStatus retryByStatus = statusCode -> statusCode == 405;//状态码重试条件
+
+
+        //根据http状态码的重试
+        RetryByStatus retryByStatus = new RetryByStatus() {
+            @Override
+            public boolean shouldRetry(Integer statusCode) {
+                return statusCode == 405;
+            }
+        };
+        //也可以直接通过lambda表达式简化
+        RetryByStatus retryByStatus1 = statusCode -> statusCode == 405;//状态码重试条件
+
+        RetryByBody retryByBody = new RetryByBody() {
+            @Override
+            public boolean shouldRetry(String body) {
+                return body.contains("机器人验证");
+            }
+        };
+        //同理直接通过lambda表达式简化
+        RetryByBody retryByBody1 = body -> body.contains("机器人验证");//返回的内容重试条件
 //
-//        RetryByBody retryByBody = body -> body.contains("机器人验证");//返回的内容重试条件
-//
-//        RetryByHttpResponse retryByHttpResponse = new RetryByHttpResponse() {//对HttpClient的返回进行判断然后重试
-//            @Override
-//            public boolean shouldRetry(HttpResponse response) {
-//                int statusCode = response.getStatusLine().getStatusCode();
-//                return false;
-//            }
-//        };
-//
-//        RetryByJsoupResponse retryByJsoupResponse = new RetryByJsoupResponse() {//对Jsoup的返回进行判断然后重试
-//            @Override
-//            public boolean shouldRetry(Connection.Response response) {
-//                int i = response.statusCode();
-//                return false;
-//            }
-//        };
+        //根据HttpClient HttpResponse 类进行重试
+        RetryByHttpResponse retryByHttpResponse = new RetryByHttpResponse() {//对HttpClient的返回进行判断然后重试
+            @Override
+            public boolean shouldRetry(HttpResponse response) {
+                //根据response的返回处理您的逻辑，如果需要重试返回true
+                return false;
+            }
+        };
+        //根据Jsoup Connection.Response类进行重试
+        RetryByJsoupResponse retryByJsoupResponse = new RetryByJsoupResponse() {//对Jsoup的返回进行判断然后重试
+            @Override
+            public boolean shouldRetry(Connection.Response response) {
+                //根据response的返回处理您的逻辑，如果需要重试返回true
+                return false;
+            }
+        };
 //
 //        //重试配置类
         RetryConfig retryConfig = RetryConfig.builder().retryCondition(retryByStatus).build();
+//        retryConfig.setRetryCondition();
         System.out.println((retryConfig.getRetryCondition() == null) + "11111");
         //设置排除某些异常
 //        retryConfig.setExcludeException(new Class[]{IOException.class, SocketTimeoutException.class});

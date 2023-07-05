@@ -30,6 +30,12 @@ public class JsoupRequests extends HttpRequests {
     //是否设置代理IP
     private Proxy proxy = null;
 
+    public JsoupRequests(String proxyIp) {
+        this.setProxyIp(proxyIp);
+    }
+    public JsoupRequests(String proxyIp,String username,String password) {
+        this.setProxyIp(proxyIp,username,password);
+    }
 
     @Override
     protected <D, T> T execute(Connection.Method method, RequestConfig<D> config, Class<T> cls, int retryCount) {

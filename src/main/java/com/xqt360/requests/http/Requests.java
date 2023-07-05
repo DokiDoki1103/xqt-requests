@@ -26,9 +26,9 @@ import org.jsoup.Connection;
  * 最后调用ParseUtils.qsStringify(map) 将其转换为username=xxx&password==xxx 直接发送请求即可
  * <p>
  * 3:对表单格式可以这么做，其实对JSONObject同理。
- *  List<String> eval = (List<String>)JSONPath.eval(jsonObject, "$.channelList[1,2,3].content.name");
+ * List<String> eval = (List<String>)JSONPath.eval(jsonObject, "$.channelList[1,2,3].content.name");
  * 推荐使用JSONPath更加方便
-
+ * <p>
  * 4:对于某些请求我们需要单独设置代理IP，或者增加header或者cookies
  * RequestConfig<String> config = RequestConfig.<String>builder()
  * .url("http://baidu.com")
@@ -41,24 +41,10 @@ import org.jsoup.Connection;
  */
 public interface Requests {
 
-    /**
-     * @param url 需要请求的url
-     * @return 返回字符串
-     */
     String get(String url);
 
-    /**
-     * @param url 需要请求的url
-     * @param cls 需要返回的类型
-     * @return 返回自己指定的类型
-     */
     <T> T get(String url, Class<T> cls);
 
-    /**
-     * @param config 请求配置类
-     * @param cls    需要返回的类型，支持：JSONObject.class  Document.class  Connection.Response.class  String.class
-     * @return 返回自己指定的类型
-     */
     <D, T> T get(RequestConfig<D> config, Class<T> cls);
 
     <D> String get(RequestConfig<D> config);
