@@ -3,7 +3,6 @@ package com.xqt360.requests.http;
 import com.xqt360.requests.config.RequestConfig;
 import com.xqt360.requests.interceptors.RequestInterceptor;
 import com.xqt360.requests.interceptors.ResponseInterceptor;
-import org.jsoup.Connection;
 
 /**
  * 目的：大大简化爬虫实现，减少冗余代码，让程序员更注重业务逻辑

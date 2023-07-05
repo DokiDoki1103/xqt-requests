@@ -245,6 +245,7 @@ private int timeout = 8000;//单位ms
 private String userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
 
 private Proxy proxy;
+private String proxyString;//格式：127.0.0.1:8888:root:password
 private boolean followRedirects = true;//默认支持重定向
 private RetryConfig retryConfig = new RetryConfig();//异常重试配置类
 
@@ -378,6 +379,7 @@ RequestInterceptor requestInterceptor = new RequestInterceptor() {
             requestConfig.setFollowRedirects();
 
         }
+        //请求过哪些网站，请求参数什么，可以在此做日志记录
     }
 };
 ```
@@ -385,7 +387,7 @@ RequestInterceptor requestInterceptor = new RequestInterceptor() {
 最后一句代码设置``` requests.setRequestInterceptor(requestInterceptor);```
 
 ### 响应拦截器 ResponseInterceptor
-原理与请求拦截器相同，不在过多赘述，具体用法自行发挥
+原理与请求拦截器相同，不在过多赘述，比如记录日志，或者返回某些内容后发送邮件或者短信提醒管理员。更多具体用法自行发挥
 
 
 ## 小蜻蜓 请求库 功能模块一览

@@ -30,22 +30,25 @@ public class JsoupRequests extends HttpRequests {
     //是否设置代理IP
     private Proxy proxy = null;
 
+
     public JsoupRequests(String proxyIp) {
         this.setProxyIp(proxyIp);
     }
-    public JsoupRequests(String proxyIp,String username,String password) {
-        this.setProxyIp(proxyIp,username,password);
+
+    public JsoupRequests(String proxyIp, String username, String password) {
+        this.setProxyIp(proxyIp, username, password);
     }
 
     @Override
     protected <D, T> T execute(Connection.Method method, RequestConfig<D> config, Class<T> cls, int retryCount) {
-        super.requestInterceptor.use(config);
-
-        SslUtil.ignoreSsl();//忽略SSL错误
-
-        RetryConfig retryConfig = Optional.ofNullable(config.getRetryConfig()).orElseGet(RetryConfig::new);
-        Connection.Response response;
         try {
+            super.requestInterceptor.use(config);
+
+            SslUtil.ignoreSsl();//忽略SSL错误
+
+            RetryConfig retryConfig = Optional.ofNullable(config.getRetryConfig()).orElseGet(RetryConfig::new);
+            Connection.Response response;
+
             Optional.ofNullable(config.getCookies()).ifPresent(cookiesStore::putAll);
 
             Connection connection = Jsoup.connect(RequestsUtils.getUrl(config))
@@ -57,7 +60,8 @@ public class JsoupRequests extends HttpRequests {
                     .ignoreHttpErrors(true)
                     .timeout(config.getTimeout());
 
-            RequestsUtils.setProxy(connection, config.getProxy() == null ? this.proxy : config.getProxy());//设置代理，优先设置请求配置类的代理
+
+            RequestsUtils.setProxy(connection, config, this.proxy);//设置代理，优先设置请求配置类的代理
             RequestsUtils.setDefaultHeadersAndBody(config, method, connection);//设置默认请求头和发送的数据
 
             response = connection.execute();
@@ -67,25 +71,30 @@ public class JsoupRequests extends HttpRequests {
                 Thread.sleep((long) retryConfig.getDelay() * (retryCount + 1));
                 return execute(method, config, cls, retryCount + 1);
             }
+            // 自动携带此次请求官方返回的Cookie
+            cookiesStore.putAll(response.cookies());
+            // 对返回内容的解析为用户指定的格式，如果不指定，那么将会返回默认的String格式，
+            // 如果需要拿到http响应头信息，请指定为 Connection.Response 类型
+            T t = ParseUtils.parseResponse(response, cls);
+
+            return super.responseInterceptor.use(t);
         } catch (Exception e) {
             return super.defaultExceptionExecute(method, config, cls, retryCount, e);
+        } finally {
+            super.restoreDefaultProxyIP();//恢复为默认的代理IP
         }
-        // 自动携带此次请求官方返回的Cookie
-        cookiesStore.putAll(response.cookies());
-        // 对返回内容的解析为用户指定的格式，如果不指定，那么将会返回默认的String格式，
-        // 如果需要拿到http响应头信息，请指定为 Connection.Response 类型
-        T t = ParseUtils.parseResponse(response, cls);
-        return super.responseInterceptor.use(t);
     }
 
     @Override
     public void setProxyIp(String proxyIp) {
+        super.setProxyIpString(proxyIp);
         String[] split = proxyIp.split(":");
         this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(split[0], Integer.parseInt(split[1])));
     }
 
     @Override
     public void setProxyIp(String proxyIp, String username, String password) {
+        super.setProxyIpString(proxyIp + ":" + username + ":" + password);
         Authenticator.setDefault(new Authenticator() {
             public PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(username, password.toCharArray());

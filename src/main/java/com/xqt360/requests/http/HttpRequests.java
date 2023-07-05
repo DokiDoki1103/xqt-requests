@@ -17,6 +17,7 @@ import org.jsoup.Connection;
 @NoArgsConstructor
 public abstract class HttpRequests implements Requests {
     protected final int MAX_RETRY_COUNT = 20;// 防止递归或者其他意外错误，最大重试次数
+    protected String proxyIpString;//格式：127.0.0.1:8888:root:password
 
     /**
      * 默认的请求拦截器。拦截RequestConfig
@@ -111,11 +112,22 @@ public abstract class HttpRequests implements Requests {
     @Override
     public abstract void setProxyIp(String proxyIp, String username, String password);
 
+    /**
+     * 恢复默认代理IP，因为每个请求会更改可能会代理ip
+     */
+    protected void restoreDefaultProxyIP() {
+        String[] split = proxyIpString.split(":");
+        if (split.length == 2) {
+            this.setProxyIp(proxyIpString);
+        } else if (split.length == 4) {
+            this.setProxyIp(split[0] + ":" + split[1], split[2], split[3]);
+        }
+    }
+
     protected <D, T> T defaultExceptionExecute(Connection.Method method, RequestConfig<D> config, Class<T> cls, int retryCount, Exception e) {
         //可能会抛出重试异常，如果抛出程序终止
         RetryConfig retryConfig = config.getRetryConfig();
         RequestsUtils.assertRetry(retryConfig, e, retryCount, MAX_RETRY_COUNT);
-//        e.printStackTrace();
         log.error("发生{}异常,正在重试第{}次", e.getClass().getName(), retryCount + 1);
         try {
             Thread.sleep((long) retryConfig.getDelay() * (retryCount + 1));

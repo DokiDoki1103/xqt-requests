@@ -57,11 +57,12 @@ public class HttpClientRequests extends HttpRequests implements Requests {
             }
             T t = ParseUtils.parseResponse(response, cls);
 
-
             return super.responseInterceptor.use(t);
 
         } catch (Exception e) {
             return super.defaultExceptionExecute(method, config, cls, retryCount, e);
+        }finally {
+            super.restoreDefaultProxyIP();//恢复为默认的代理IP
         }
     }
 

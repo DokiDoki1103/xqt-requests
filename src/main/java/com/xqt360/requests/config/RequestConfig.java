@@ -18,6 +18,7 @@ import java.util.Optional;
  */
 @Data
 @Builder
+
 @NoArgsConstructor
 public class RequestConfig<D> {
 
@@ -39,6 +40,7 @@ public class RequestConfig<D> {
     private String userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
 
     private Proxy proxy;
+    private String proxyString;//格式：127.0.0.1:8888:root:password
     private boolean followRedirects = true;//默认支持重定向
     private RetryConfig retryConfig = new RetryConfig();//异常重试配置类
 
@@ -60,7 +62,7 @@ public class RequestConfig<D> {
         Optional.ofNullable(map).ifPresent(m -> m.remove(key));
     }
 
-    public RequestConfig(Connection.Method method, String url, String queryString, D data, Map<String, String> headers, Map<String, String> cookies, int timeout, String userAgent, Proxy proxy, boolean followRedirects, RetryConfig retryConfig) {
+    public RequestConfig(Connection.Method method, String url, String queryString, D data, Map<String, String> headers, Map<String, String> cookies, int timeout, String userAgent, Proxy proxy, String proxyString,boolean followRedirects, RetryConfig retryConfig) {
         this.method = method;
         this.url = url;
         this.queryString = queryString == null ? this.queryString : queryString;
@@ -72,6 +74,7 @@ public class RequestConfig<D> {
         this.proxy = proxy;
         this.followRedirects = followRedirects;
         this.retryConfig = retryConfig == null ? new RetryConfig() : retryConfig;
+        this.proxyString = proxyString;
     }
 }
 

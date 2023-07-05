@@ -38,6 +38,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -136,8 +138,28 @@ public class RequestsUtils {
         return config.getUrl() + ((config.getQueryString() == null || config.getQueryString().isEmpty()) ? "" : "?" + config.getQueryString());
     }
 
-    public static void setProxy(Connection connection, Proxy proxy) {
-        Optional.ofNullable(proxy).ifPresent(connection::proxy);
+    public static<D>  void setProxy(Connection connection, RequestConfig<D> config,Proxy defaultProxy) {
+        //正确的设置了IP字符串的情况下
+        if (config.getProxyString() != null && config.getProxyString().length() > 0) {
+            String[] split = config.getProxyString().split(":");
+            if (split.length == 2) {
+                connection.proxy(split[0],Integer.parseInt(split[1]));//设置代理IP；
+                return;
+            }else if (split.length == 4){
+                Authenticator.setDefault(new Authenticator() {
+                    public PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(split[2], split[3].toCharArray());
+                    }
+                });
+                connection.proxy(split[0],Integer.parseInt(split[1]));//设置代理IP；
+                return;
+            }
+        }
+        if (config.getProxy() != null){
+            connection.proxy(config.getProxy());
+            return;
+        }
+        connection.proxy(defaultProxy);
     }
 
     public static boolean needRetry(RetryConfig retryConfig, Connection.Response response, int retryCount, int maxRetryCount) {
