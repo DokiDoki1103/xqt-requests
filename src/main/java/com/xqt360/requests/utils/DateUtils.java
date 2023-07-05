@@ -18,12 +18,12 @@ public class DateUtils {
         List<String> dayss = new ArrayList<>();
         Calendar start = Calendar.getInstance();
         start.setTime(getDateAdd(days));
-        Long startTIme = start.getTimeInMillis();
+        long startTime = start.getTimeInMillis();
         Calendar end = Calendar.getInstance();
         end.setTime(new Date());
-        Long endTime = end.getTimeInMillis();
-        Long oneDay = 1000 * 60 * 60 * 24l;
-        Long time = startTIme;
+        long endTime = end.getTimeInMillis();
+        long oneDay = 1000 * 60 * 60 * 24L;
+        long time = startTime;
         while (time <= endTime) {
             Date d = new Date(time);
             DateFormat df = new SimpleDateFormat("MM-dd");
@@ -58,7 +58,7 @@ public class DateUtils {
     public static Date formatStrToDate(String str, String pattern) {
         try {
             return new SimpleDateFormat(pattern).parse(str);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         return new Date();
     }

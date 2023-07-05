@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
 
-
 @Data
 @Slf4j
 @NoArgsConstructor
@@ -115,7 +114,7 @@ public abstract class HttpRequests implements Requests {
     /**
      * 恢复默认代理IP，因为每个请求会更改可能会代理ip
      */
-    protected void restoreDefaultProxyIP() {
+    protected void restoreDefaultProxyIP(String proxyIpString) {
         String[] split = proxyIpString.split(":");
         if (split.length == 2) {
             this.setProxyIp(proxyIpString);

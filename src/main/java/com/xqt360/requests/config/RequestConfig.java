@@ -1,6 +1,5 @@
 package com.xqt360.requests.config;
 
-
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,13 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-
-/**
- * 设置请求参数，比如超时时间
- */
 @Data
 @Builder
-
 @NoArgsConstructor
 public class RequestConfig<D> {
 

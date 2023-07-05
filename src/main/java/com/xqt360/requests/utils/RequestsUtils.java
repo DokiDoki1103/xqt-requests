@@ -14,6 +14,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
@@ -22,6 +23,7 @@ import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
@@ -37,7 +39,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
@@ -74,8 +75,19 @@ public class RequestsUtils {
 
 
     @SneakyThrows
-    public static <D> HttpUriRequest createRequest(RequestConfig<D> config, Connection.Method method)  {
+    public static <D> HttpUriRequest createRequest(RequestConfig<D> config, Connection.Method method, CloseableHttpClient defaultHttpClient) {
         RequestBuilder requestBuilder = RequestBuilder.create(method.name()).setUri(RequestsUtils.getUrl(config));
+
+
+        org.apache.http.client.config.RequestConfig build = org.apache.http.client.config.RequestConfig.custom()
+                .setConnectTimeout(config.getTimeout())
+                .setSocketTimeout(config.getTimeout())
+                .setConnectionRequestTimeout(config.getTimeout())
+                .setCookieSpec(CookieSpecs.DEFAULT)
+                .setRedirectsEnabled(config.isFollowRedirects())
+                .build();
+
+        requestBuilder.setConfig(build);
         //传入的参数是一个JSON对象或者json字符串
         if (method == Connection.Method.POST && isJsonData(config.getData())) {
             String jsonString = JSON.toJSONString(config.getData());
@@ -138,24 +150,25 @@ public class RequestsUtils {
         return config.getUrl() + ((config.getQueryString() == null || config.getQueryString().isEmpty()) ? "" : "?" + config.getQueryString());
     }
 
-    public static<D>  void setProxy(Connection connection, RequestConfig<D> config,Proxy defaultProxy) {
+    public static <D> void setProxy(Connection connection, RequestConfig<D> config, Proxy defaultProxy) {
         //正确的设置了IP字符串的情况下
         if (config.getProxyString() != null && config.getProxyString().length() > 0) {
             String[] split = config.getProxyString().split(":");
             if (split.length == 2) {
-                connection.proxy(split[0],Integer.parseInt(split[1]));//设置代理IP；
+                connection.proxy(split[0], Integer.parseInt(split[1]));//设置代理IP；
                 return;
-            }else if (split.length == 4){
+            } else if (split.length == 4) {
                 Authenticator.setDefault(new Authenticator() {
+                    @Override
                     public PasswordAuthentication getPasswordAuthentication() {
                         return new PasswordAuthentication(split[2], split[3].toCharArray());
                     }
                 });
-                connection.proxy(split[0],Integer.parseInt(split[1]));//设置代理IP；
+                connection.proxy(split[0], Integer.parseInt(split[1]));//设置代理IP；
                 return;
             }
         }
-        if (config.getProxy() != null){
+        if (config.getProxy() != null) {
             connection.proxy(config.getProxy());
             return;
         }

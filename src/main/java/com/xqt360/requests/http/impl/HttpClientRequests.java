@@ -44,7 +44,9 @@ public class HttpClientRequests extends HttpRequests implements Requests {
     @Override
     protected <D, T> T execute(Connection.Method method, RequestConfig<D> config, Class<T> cls, int retryCount) {
         SslUtil.ignoreSsl();
-        HttpUriRequest  httpUriRequest = RequestsUtils.createRequest(config, method);
+        HttpUriRequest  httpUriRequest = RequestsUtils.createRequest(config, method,httpClient);
+
+        super.restoreDefaultProxyIP(config.getProxyString());//设置代理IP
 
         try (CloseableHttpResponse response = httpClient.execute(httpUriRequest)) {
             log.info("{} {} 请求 {}", method.name(), response.getStatusLine().getStatusCode(), config.getUrl());
@@ -62,7 +64,7 @@ public class HttpClientRequests extends HttpRequests implements Requests {
         } catch (Exception e) {
             return super.defaultExceptionExecute(method, config, cls, retryCount, e);
         }finally {
-            super.restoreDefaultProxyIP();//恢复为默认的代理IP
+            super.restoreDefaultProxyIP(super.proxyIpString);//恢复为默认的代理IP
         }
     }
 

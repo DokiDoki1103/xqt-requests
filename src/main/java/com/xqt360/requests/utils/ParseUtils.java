@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.xqt360.requests.exception.UnsupportedTypeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;

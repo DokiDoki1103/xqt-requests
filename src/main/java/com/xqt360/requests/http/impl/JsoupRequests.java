@@ -81,7 +81,7 @@ public class JsoupRequests extends HttpRequests {
         } catch (Exception e) {
             return super.defaultExceptionExecute(method, config, cls, retryCount, e);
         } finally {
-            super.restoreDefaultProxyIP();//恢复为默认的代理IP
+            super.restoreDefaultProxyIP(super.proxyIpString);//恢复为默认的代理IP
         }
     }
 
@@ -96,6 +96,7 @@ public class JsoupRequests extends HttpRequests {
     public void setProxyIp(String proxyIp, String username, String password) {
         super.setProxyIpString(proxyIp + ":" + username + ":" + password);
         Authenticator.setDefault(new Authenticator() {
+            @Override
             public PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(username, password.toCharArray());
             }
