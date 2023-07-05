@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -91,13 +92,13 @@ public class RequestsUtils {
         //传入的参数是一个JSON对象或者json字符串
         if (method == Connection.Method.POST && isJsonData(config.getData())) {
             String jsonString = JSON.toJSONString(config.getData());
-            requestBuilder.setEntity(new StringEntity(jsonString));
+            requestBuilder.setEntity(new StringEntity(jsonString, StandardCharsets.UTF_8));
             requestBuilder.addHeader("Content-Type", ContentType.APPLICATION_FORM_URLENCODED_UTF8_VALUE);
         } else if (method == Connection.Method.POST && config.getData() instanceof Map) {
             requestBuilder.addHeader("Content-Type", ContentType.APPLICATION_FORM_URLENCODED_UTF8_VALUE);
-            requestBuilder.setEntity(new StringEntity(ParseUtils.qsStringify((Map) config.getData())));
+            requestBuilder.setEntity(new StringEntity(ParseUtils.qsStringify((Map) config.getData()),StandardCharsets.UTF_8));
         } else if (method == Connection.Method.POST && config.getData() instanceof String) {
-            requestBuilder.setEntity(new StringEntity(config.getData().toString()));
+            requestBuilder.setEntity(new StringEntity(config.getData().toString(),StandardCharsets.UTF_8));
             requestBuilder.addHeader("Content-Type", isFormUrlEncoded(config.getData().toString()) ? ContentType.APPLICATION_FORM_URLENCODED_UTF8_VALUE : ContentType.TEXT_PLAIN_VALUE);
         } else if (method == Connection.Method.POST && config.getData() instanceof List) {//有些网站的键值对会重复
             List<NameValuePair> nameValuePairs = new ArrayList<>();
@@ -198,20 +199,16 @@ public class RequestsUtils {
 
 
     public static boolean needRetry(RetryConfig retryConfig, HttpResponse response, int retryCount, int MAX_RETRY_COUNT) {
-//        System.out.println("判断是否满足重试条件"+(retryConfig.getRetryCondition() instanceof RetryByStatus));
         if (retryConfig == null || retryConfig.getRetryCondition() == null) {
             return false;
         }
-        System.out.println(retryConfig.getRetryCondition() instanceof RetryByStatus);
 
         //防止程序员设置错了重试次数导致递归问题出现，默认最大重试20次
         if (retryCount >= Math.min(MAX_RETRY_COUNT, retryConfig.getMaxAttempts())) {
             throw new RetryException("异常重试次数达到最大值" + retryCount);
         }
 
-
         if (retryConfig.getRetryCondition() instanceof RetryByStatus) {
-            System.out.println("走到 了这里");
             RetryByStatus retryCondition = (RetryByStatus) retryConfig.getRetryCondition();
             return retryCondition.shouldRetry(response.getStatusLine().getStatusCode());
         } else if (retryConfig.getRetryCondition() instanceof RetryByBody) {

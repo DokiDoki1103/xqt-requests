@@ -3,6 +3,7 @@ package com.xqt360.requests.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.xqt360.requests.exception.UnsupportedTypeException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Connection;
@@ -36,6 +37,8 @@ public class ParseUtils {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else if ("byte[]".equals(cls.getSimpleName())) {
+            return (T) response.bodyAsBytes();
         } else {
             throw new UnsupportedTypeException(cls);
         }
@@ -63,16 +66,17 @@ public class ParseUtils {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            } else if ("byte[]".equals(cls.getSimpleName())) {
+                return (T)IOUtils.toByteArray(response.getEntity().getContent());
             } else {
                 throw new UnsupportedTypeException(cls);
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
-
 
 
     public static String qsStringify(Map<String, String> params) {

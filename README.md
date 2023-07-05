@@ -210,7 +210,15 @@ strings.add("password=123456");
 String data8 = requests.post("https://baidu.com", strings);
 //其他的类型还不支持，如果有好的建议可以提出来
 ```
+### 下载文件
+下载文件一行代码搞定，可以使用绝对路径和相对路径，如果不知道自己项目所在位置推荐使用绝对路径
+```java
+//使用相对路径
+requests.download("https://lyck6.cn/img/6.png","./6.png");
 
+//使用绝对路径
+requests.download("https://lyck6.cn/img/6.png","/www/wwwroot/6.png");
+```
 ### 发送其他请求
 Requests接口有如下方法可供调用
 ```java

@@ -4,6 +4,7 @@ import com.xqt360.requests.config.RequestConfig;
 import com.xqt360.requests.config.RetryConfig;
 import com.xqt360.requests.interceptors.RequestInterceptor;
 import com.xqt360.requests.interceptors.ResponseInterceptor;
+import com.xqt360.requests.utils.FileUtils;
 import com.xqt360.requests.utils.RequestsUtils;
 import lombok.Data;
 
@@ -96,6 +97,12 @@ public abstract class HttpRequests implements Requests {
     }
 
     @Override
+    public void  download(String url,String path) {
+        byte[] bytes = get(url, byte[].class);
+        FileUtils.saveFile(bytes,path);
+    }
+
+    @Override
     public void setRequestInterceptor(RequestInterceptor requestInterceptor) {
         this.requestInterceptor = requestInterceptor;
     }
@@ -114,7 +121,10 @@ public abstract class HttpRequests implements Requests {
     /**
      * 恢复默认代理IP，因为每个请求会更改可能会代理ip
      */
-    protected void restoreDefaultProxyIP(String proxyIpString) {
+    protected void restoreDefaultProxyIp(String proxyIpString) {
+        if (proxyIpString ==null || proxyIpString.isEmpty()){
+            return;
+        }
         String[] split = proxyIpString.split(":");
         if (split.length == 2) {
             this.setProxyIp(proxyIpString);

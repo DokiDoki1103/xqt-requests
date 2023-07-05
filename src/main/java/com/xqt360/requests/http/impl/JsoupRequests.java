@@ -3,6 +3,7 @@ package com.xqt360.requests.http.impl;
 import com.xqt360.requests.config.RequestConfig;
 import com.xqt360.requests.config.RetryConfig;
 import com.xqt360.requests.http.HttpRequests;
+import com.xqt360.requests.utils.FileUtils;
 import com.xqt360.requests.utils.ParseUtils;
 import com.xqt360.requests.utils.RequestsUtils;
 import com.xqt360.requests.utils.SslUtil;
@@ -29,7 +30,6 @@ public class JsoupRequests extends HttpRequests {
     private final Map<String, String> cookiesStore = new HashMap<>();
     //是否设置代理IP
     private Proxy proxy = null;
-
 
     public JsoupRequests(String proxyIp) {
         this.setProxyIp(proxyIp);
@@ -81,7 +81,7 @@ public class JsoupRequests extends HttpRequests {
         } catch (Exception e) {
             return super.defaultExceptionExecute(method, config, cls, retryCount, e);
         } finally {
-            super.restoreDefaultProxyIP(super.proxyIpString);//恢复为默认的代理IP
+            super.restoreDefaultProxyIp(super.proxyIpString);//恢复为默认的代理IP
         }
     }
 
@@ -91,6 +91,8 @@ public class JsoupRequests extends HttpRequests {
         String[] split = proxyIp.split(":");
         this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(split[0], Integer.parseInt(split[1])));
     }
+
+
 
     @Override
     public void setProxyIp(String proxyIp, String username, String password) {

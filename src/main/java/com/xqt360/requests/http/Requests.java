@@ -28,6 +28,8 @@ public interface Requests {
 
     <D, T> T execute(RequestConfig<D> config, Class<T> cls);
 
+    void download(String url,String path);
+
     void setRequestInterceptor(RequestInterceptor requestInterceptor);
 
     void setResponseInterceptor(ResponseInterceptor responseInterceptor);
