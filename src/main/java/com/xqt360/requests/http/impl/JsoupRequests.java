@@ -3,7 +3,6 @@ package com.xqt360.requests.http.impl;
 import com.xqt360.requests.config.RequestConfig;
 import com.xqt360.requests.config.RetryConfig;
 import com.xqt360.requests.http.HttpRequests;
-import com.xqt360.requests.utils.FileUtils;
 import com.xqt360.requests.utils.ParseUtils;
 import com.xqt360.requests.utils.RequestsUtils;
 import com.xqt360.requests.utils.SslUtil;
@@ -91,7 +90,6 @@ public class JsoupRequests extends HttpRequests {
         String[] split = proxyIp.split(":");
         this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(split[0], Integer.parseInt(split[1])));
     }
-
 
 
     @Override

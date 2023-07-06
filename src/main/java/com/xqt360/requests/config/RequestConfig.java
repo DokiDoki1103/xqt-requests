@@ -5,11 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jsoup.Connection;
 
-
 import java.net.Proxy;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.apache.commons.codec.CharEncoding.UTF_8;
 
 @Data
 @Builder
@@ -46,6 +48,19 @@ public class RequestConfig<D> {
         this.addMap(this.cookies, key, val);
     }
 
+
+    public void addCookie(String cookieString){
+        String[] split = cookieString.split(";\\s?");
+        for (String s : split) {
+            String[] split1 = s.split("=");
+            try{
+                addCookie(URLDecoder.decode(split1[1],UTF_8), URLDecoder.decode(split1[1],UTF_8));
+            }catch (Exception ignored){
+
+            }
+        }
+
+    }
 
     private <K, V> void addMap(Map<K, V> map, K key, V val) {
         map = Optional.ofNullable(map).orElseGet(HashMap::new);

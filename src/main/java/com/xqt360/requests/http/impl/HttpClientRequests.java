@@ -68,8 +68,6 @@ public class HttpClientRequests extends HttpRequests implements Requests {
         }
     }
 
-
-
     @Override
     public void setProxyIp(String proxyIp) {
         setProxyIp(proxyIp, "", "");
