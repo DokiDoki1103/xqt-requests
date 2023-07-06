@@ -7,10 +7,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-/**
- * @author zhangxiaoyuan
- * @date 2021/1/10 18:19
- */
 public class DateUtils {
 
     public static List<String> getDaysBetween(int days){
