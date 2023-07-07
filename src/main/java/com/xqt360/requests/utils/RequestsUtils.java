@@ -58,12 +58,13 @@ public class RequestsUtils {
 
     private static boolean isValidObject(Object obj) {
         try {
-            JSON.parseObject(JSON.toJSONString(obj));
+            JSON.parseObject(obj.toString());
             return true;
         } catch (Exception ignored) {
+            ignored.printStackTrace();
         }
         try {
-            JSON.parseArray(JSON.toJSONString(obj));
+            JSON.parseArray(obj.toString());
             return true;
         } catch (Exception e) {
             return false;
@@ -89,10 +90,10 @@ public class RequestsUtils {
                 .build();
 
         requestBuilder.setConfig(build);
+
         //传入的参数是一个JSON对象或者json字符串
         if (method == Connection.Method.POST && isJsonData(config.getData())) {
-            String jsonString = JSON.toJSONString(config.getData());
-            requestBuilder.setEntity(new StringEntity(jsonString, StandardCharsets.UTF_8));
+            requestBuilder.setEntity(new StringEntity(config.getData().toString(), StandardCharsets.UTF_8));
             requestBuilder.addHeader("Content-Type", ContentType.APPLICATION_FORM_URLENCODED_UTF8_VALUE);
         } else if (method == Connection.Method.POST && config.getData() instanceof Map) {
             requestBuilder.addHeader("Content-Type", ContentType.APPLICATION_FORM_URLENCODED_UTF8_VALUE);
@@ -125,7 +126,7 @@ public class RequestsUtils {
 
         if (method == Connection.Method.POST && isJsonData(config.getData())) {
             connection.header("Content-Type", ContentType.APPLICATION_JSON_UTF8_VALUE);
-            connection.requestBody(JSON.toJSONString(config.getData()));
+            connection.requestBody(config.getData().toString());
         } else if (config.getData() instanceof List && method == Connection.Method.POST) {//有些网站的键值对会重复
             connection.header("Content-Type", ContentType.APPLICATION_FORM_URLENCODED_UTF8_VALUE);
             for (Object datum : (List) config.getData()) {
