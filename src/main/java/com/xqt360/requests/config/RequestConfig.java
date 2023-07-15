@@ -41,11 +41,11 @@ public class RequestConfig<D> {
     private RetryConfig retryConfig = new RetryConfig();//异常重试配置类
 
     public void addHeader(String key, String val) {
-        this.addMap(this.headers, key, val);
+        this.headers = this.addMap(this.headers, key, val);
     }
 
     public void addCookie(String key, String val) {
-        this.addMap(this.cookies, key, val);
+        this.cookies = this.addMap(this.cookies, key, val);
     }
 
 
@@ -62,9 +62,10 @@ public class RequestConfig<D> {
 
     }
 
-    private <K, V> void addMap(Map<K, V> map, K key, V val) {
+    private <K, V> Map<K, V> addMap(Map<K, V> map, K key, V val) {
         map = Optional.ofNullable(map).orElseGet(HashMap::new);
         map.put(key, val);
+        return map;
     }
 
     private <K, V> void removeMapKey(Map<K, V> map, K key) {

@@ -51,4 +51,21 @@ public class FileUtils {
             }
         }
     }
+
+    public static String readFile(String filePath) {
+        StringBuilder content = new StringBuilder();
+
+        File file = new File(filePath);
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return content.toString();
+    }
 }

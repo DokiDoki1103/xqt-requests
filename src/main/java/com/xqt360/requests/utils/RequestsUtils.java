@@ -9,6 +9,7 @@ import com.xqt360.requests.exception.RetryException;
 import com.xqt360.requests.exception.UnsupportedTypeException;
 import com.xqt360.requests.retry.*;
 import lombok.SneakyThrows;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -42,10 +43,13 @@ import java.io.IOException;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RequestsUtils {
     private static boolean isJsonData(Object data) {
@@ -53,15 +57,23 @@ public class RequestsUtils {
     }
 
     private static boolean isFormUrlEncoded(String data) {
-        return ParseUtils.qsParse(data).size() > 0;
+        try {
+            String decodedRequestBody = URLDecoder.decode(data);
+            Pattern pattern = Pattern.compile("^[^=&]+=[^=&]+(&[^=&]+=[^=&]+)*$");
+            Matcher matcher = pattern.matcher(decodedRequestBody);
+            return matcher.matches() && ParseUtils.qsParse(data).size() > 0;
+        } catch (Exception e) {
+            return false;
+        }
     }
+
 
     private static boolean isValidObject(Object obj) {
         try {
             JSON.parseObject(obj.toString());
             return true;
         } catch (Exception ignored) {
-            ignored.printStackTrace();
+//            ignored.printStackTrace();
         }
         try {
             JSON.parseArray(obj.toString());
@@ -90,16 +102,19 @@ public class RequestsUtils {
                 .build();
 
         requestBuilder.setConfig(build);
-
-        //传入的参数是一个JSON对象或者json字符串
+        if (config.getUserAgent() != null) {
+            requestBuilder.setHeader(HttpHeaders.USER_AGENT, config.getUserAgent());
+        } else if (config.getHeaders().containsKey(HttpHeaders.USER_AGENT)) {
+            requestBuilder.setHeader(HttpHeaders.USER_AGENT, config.getHeaders().get(HttpHeaders.USER_AGENT));
+        }
         if (method == Connection.Method.POST && isJsonData(config.getData())) {
             requestBuilder.setEntity(new StringEntity(config.getData().toString(), StandardCharsets.UTF_8));
             requestBuilder.addHeader("Content-Type", ContentType.APPLICATION_FORM_URLENCODED_UTF8_VALUE);
         } else if (method == Connection.Method.POST && config.getData() instanceof Map) {
             requestBuilder.addHeader("Content-Type", ContentType.APPLICATION_FORM_URLENCODED_UTF8_VALUE);
-            requestBuilder.setEntity(new StringEntity(ParseUtils.qsStringify((Map) config.getData()),StandardCharsets.UTF_8));
+            requestBuilder.setEntity(new StringEntity(ParseUtils.qsStringify((Map) config.getData()), StandardCharsets.UTF_8));
         } else if (method == Connection.Method.POST && config.getData() instanceof String) {
-            requestBuilder.setEntity(new StringEntity(config.getData().toString(),StandardCharsets.UTF_8));
+            requestBuilder.setEntity(new StringEntity(config.getData().toString(), StandardCharsets.UTF_8));
             requestBuilder.addHeader("Content-Type", isFormUrlEncoded(config.getData().toString()) ? ContentType.APPLICATION_FORM_URLENCODED_UTF8_VALUE : ContentType.TEXT_PLAIN_VALUE);
         } else if (method == Connection.Method.POST && config.getData() instanceof List) {//有些网站的键值对会重复
             List<NameValuePair> nameValuePairs = new ArrayList<>();
@@ -116,17 +131,26 @@ public class RequestsUtils {
             UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nameValuePairs);
             requestBuilder.setEntity(urlEncodedFormEntity);
         }
-
         Optional.ofNullable(config.getHeaders()).ifPresent(headers -> headers.forEach(requestBuilder::addHeader));
         return requestBuilder.build();
     }
 
     public static <D> void setDefaultHeadersAndBody(RequestConfig<D> config, Connection.Method method, Connection connection) {
+
+
+        if (config.getUserAgent() != null) {
+            connection.userAgent(config.getUserAgent());
+        } else if (config.getHeaders().containsKey(HttpHeaders.USER_AGENT)) {
+            connection.userAgent(config.getHeaders().get(HttpHeaders.USER_AGENT));
+        }
+
+
         Optional.ofNullable(config.getHeaders()).ifPresent(connection::headers);//加上配置类的请求头
 
         if (method == Connection.Method.POST && isJsonData(config.getData())) {
             connection.header("Content-Type", ContentType.APPLICATION_JSON_UTF8_VALUE);
             connection.requestBody(config.getData().toString());
+
         } else if (config.getData() instanceof List && method == Connection.Method.POST) {//有些网站的键值对会重复
             connection.header("Content-Type", ContentType.APPLICATION_FORM_URLENCODED_UTF8_VALUE);
             for (Object datum : (List) config.getData()) {

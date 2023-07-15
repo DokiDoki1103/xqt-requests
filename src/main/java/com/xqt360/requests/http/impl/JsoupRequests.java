@@ -80,6 +80,7 @@ public class JsoupRequests extends HttpRequests {
 
             return super.responseInterceptor.use(t);
         } catch (Exception e) {
+            e.printStackTrace();
             return super.defaultExceptionExecute(method, config, cls, retryCount, e);
         } finally {
             super.restoreDefaultProxyIp(super.proxyIpString);//恢复为默认的代理IP
