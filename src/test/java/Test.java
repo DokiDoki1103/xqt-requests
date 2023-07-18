@@ -1,55 +1,12 @@
-import com.xqt360.requests.config.RequestConfig;
-import com.xqt360.requests.http.Requests;
-import com.xqt360.requests.http.impl.JsoupRequests;
-import com.xqt360.requests.utils.FileUtils;
-import lombok.SneakyThrows;
-import org.jsoup.Connection;
-import org.jsoup.nodes.Document;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import lombok.SneakyThrows;
 
 
 public class Test {
 
     @SneakyThrows
     public static void main(String[] args) {
-//        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 5);
-        Requests requests = new JsoupRequests();
-        while (true){
-            try {
-                String s = requests.get("http://adf1b8f2017a373e6810445ddfddf4818.asuscomm.com:54100/api/test?methods=fu_jian_shi_fan_da_xue");
 
-
-            }catch (Exception e){
-                e.printStackTrace();
-
-            }
-            Thread.sleep(100);
-
-        }
-
-//        String s = FileUtils.readFile("/Users/zhangxiaoyuan/Downloads/代码2/parse/dist/test.txt");
-
-//        while (true){
-//            executor.submit(()->{
-//
-//                    RequestConfig<String> stringRequestConfig = new RequestConfig<>();
-//                    stringRequestConfig.setUrl("");
-//                    stringRequestConfig.setMethod(Connection.Method.POST);
-//                    stringRequestConfig.setData(s);
-//                    stringRequestConfig.addHeader("access-token","sq_ogDR10qdayuNxG_Fcfcq5WhO3XCJ78o__");
-//                    stringRequestConfig.addHeader("Version","2.0");
-//                Document execute = requests.execute(stringRequestConfig, Document.class);
-////                System.out.println(execute.body());
-//
-//
-//            });
-//
-//            Thread.sleep(80);
-//        }
 //        //创建 HttpClient，使用HttpClient发送请求xxxx
 //        Requests requests1 = new HttpClientRequests();
 //        Requests requests2 = new HttpClientRequests(true, "127.0.0.1:8888");
