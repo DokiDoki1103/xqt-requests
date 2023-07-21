@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
@@ -27,8 +28,11 @@ import java.util.Optional;
 @Data
 @NoArgsConstructor
 public class JsoupRequests extends HttpRequests {
+    private final Connection session = Jsoup.newSession()
+            .maxBodySize(1024 * 1024 * 1024)
+            .ignoreContentType(true)
+            .ignoreHttpErrors(true);
     //标准来说应该区分域名来设置cookies，这里为了方便，直接写一起，后期有需要再改动
-    private final Map<String, String> cookiesStore = new HashMap<>();
     //是否设置代理IP
     private Proxy proxy = null;
 
@@ -39,28 +43,26 @@ public class JsoupRequests extends HttpRequests {
     public JsoupRequests(String proxyIp, String username, String password) {
         this.setProxyIp(proxyIp, username, password);
     }
-
+    static {
+        SslUtil.ignoreSsl();
+    }
     @Override
     protected <D, T> T execute(Connection.Method method, RequestConfig<D> config, Class<T> cls, int retryCount) {
         try {
             super.requestInterceptor.use(config);
 
-            SslUtil.ignoreSsl();//忽略SSL错误
-
             RetryConfig retryConfig = Optional.ofNullable(config.getRetryConfig()).orElseGet(RetryConfig::new);
 
-            Optional.ofNullable(config.getCookies()).ifPresent(cookiesStore::putAll);
+            Connection connection = session.newRequest()
+                    .url(RequestsUtils.getUrl(config))
 
-            Connection connection = Jsoup.connect(RequestsUtils.getUrl(config))
-                    .maxBodySize(1024 * 1024 * 1024)
                     .method(method)
                     .followRedirects(config.isFollowRedirects())
-                    .cookies(cookiesStore)
 
-                    .ignoreContentType(true)
-                    .ignoreHttpErrors(true)
                     .timeout(config.getTimeout());
-
+           if (config.getCookies()!=null){
+               config.getCookies().forEach(connection::cookie);
+           }
 
             RequestsUtils.setProxy(connection, config, this.proxy);//设置代理，优先设置请求配置类的代理
             RequestsUtils.setDefaultHeadersAndBody(config, method, connection);//设置默认请求头和发送的数据
@@ -73,7 +75,7 @@ public class JsoupRequests extends HttpRequests {
                 return execute(method, config, cls, retryCount + 1);
             }
             // 自动携带此次请求官方返回的Cookie
-            cookiesStore.putAll(response.cookies());
+//            cookiesStore.putAll(response.cookies());
             // 对返回内容的解析为用户指定的格式，如果不指定，那么将会返回默认的String格式，
             // 如果需要拿到http响应头信息，请指定为 Connection.Response 类型
             T t = ParseUtils.parseResponse(response, cls);

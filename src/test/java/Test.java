@@ -1,10 +1,8 @@
 
-import lombok.SneakyThrows;
 
 
 public class Test {
 
-    @SneakyThrows
     public static void main(String[] args) {
 
 //        //创建 HttpClient，使用HttpClient发送请求xxxx

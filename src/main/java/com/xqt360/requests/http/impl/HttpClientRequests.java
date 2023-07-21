@@ -26,6 +26,7 @@ import java.io.IOException;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class HttpClientRequests extends HttpRequests implements Requests {
+
     private DefaultHttpClient httpClient;
 
     public HttpClientRequests() {
@@ -40,10 +41,11 @@ public class HttpClientRequests extends HttpRequests implements Requests {
         this.httpClient = isHttps ? RequestsUtils.getHttpsClient(proxyIp, username, password) : RequestsUtils.getHttpClient(proxyIp, username, password);
     }
 
-
+    static {
+        SslUtil.ignoreSsl();
+    }
     @Override
     protected <D, T> T execute(Connection.Method method, RequestConfig<D> config, Class<T> cls, int retryCount) {
-        SslUtil.ignoreSsl();
         super.requestInterceptor.use(config);
         HttpUriRequest  httpUriRequest = RequestsUtils.createRequest(config, method,httpClient);
 
