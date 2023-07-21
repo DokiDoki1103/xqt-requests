@@ -1,4 +1,4 @@
-<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">小蜻蜓请求库1.0.4</h1>
+<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">小蜻蜓请求库1.0.5</h1>
 <h4 align="center">一个轻量级 Java HTTP请求框架，让请求变得简单、优雅！</h4>
 
 
@@ -21,7 +21,7 @@
 <dependency>
   <groupId>com.xqt365.requests</groupId>
   <artifactId>xqt-requests</artifactId>
-  <version>1.0.4-RELEASE</version>
+  <version>1.0.5-RELEASE</version>
   <classifier>jar-with-dependencies</classifier> <!--如果自己的项目中有了xqt-requests所有依赖，并且版本都兼容，则可注释本行-->
 </dependency>
 ```
