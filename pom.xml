@@ -12,7 +12,7 @@
 
     <groupId>com.xqt365.requests</groupId>
     <artifactId>xqt-requests</artifactId>
-    <version>1.0.3-RELEASE</version>
+    <version>1.0.4-RELEASE</version>
     <name>小蜻蜓请求库</name>
 
     <properties>

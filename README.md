@@ -1,9 +1,32 @@
-<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">小蜻蜓请求库</h1>
+<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">小蜻蜓请求库1.0.4</h1>
 <h4 align="center">一个轻量级 Java HTTP请求框架，让请求变得简单、优雅！</h4>
 
 
 ---
-
+## 如何安装：
+### 通过更换maven中央仓库
+如果自己项目中没有其他的私有仓库，可直接将maven的```setting.xml```文件中```mirrors```节点改为，此仓库还代理了阿里云maven仓库``` http://maven.aliyun.com/nexus/content/groups/public ```，可当加速仓库使用
+```xml
+  <mirrors>
+    <mirror>
+      <id>lyck</id>
+      <mirrorOf>central</mirrorOf>
+      <name>private</name>
+      <url>http://maven.lyck6.cn/repository/maven-public/</url>
+    </mirror>
+  </mirrors>
+```
+然后假如maven坐标
+```xml
+<dependency>
+  <groupId>com.xqt365.requests</groupId>
+  <artifactId>xqt-requests</artifactId>
+  <version>1.0.4-RELEASE</version>
+  <classifier>jar-with-dependencies</classifier> <!--如果自己的项目中有了xqt-requests所有依赖，并且版本都兼容，则可注释本行-->
+</dependency>
+```
+### 下载发行版jar包
+下载jar包引入自己的项目依旧可以使用
 ## 前言：
 
 - 在开发中自己是否经常写一大堆冗余代码？明明简单的POST、GET请求却需要
