@@ -44,16 +44,19 @@ public class HttpClientRequests extends HttpRequests implements Requests {
     static {
         SslUtil.ignoreSsl();
     }
+
     @Override
     protected <D, T> T execute(Connection.Method method, RequestConfig<D> config, Class<T> cls, int retryCount) {
         super.requestInterceptor.use(config);
-        HttpUriRequest  httpUriRequest = RequestsUtils.createRequest(config, method,httpClient);
+        HttpUriRequest httpUriRequest = RequestsUtils.createRequest(config, method, httpClient);
 
         super.restoreDefaultProxyIp(config.getProxyString());//设置代理IP
-        try (CloseableHttpResponse response = httpClient.execute(httpUriRequest)) {
+        CloseableHttpResponse response = null;
+        try {
+            response = httpClient.execute(httpUriRequest);
             log.info("{} {} 请求 {}", method.name(), response.getStatusLine().getStatusCode(), config.getUrl());
             RetryConfig retryConfig = config.getRetryConfig();
-            if (RequestsUtils.needRetry(retryConfig, response,retryCount,super.MAX_RETRY_COUNT)) {
+            if (RequestsUtils.needRetry(retryConfig, response, retryCount, super.MAX_RETRY_COUNT)) {
                 log.error("满足条件重试条件,正在重试第{}次", retryCount + 1);
                 Thread.sleep((long) retryConfig.getDelay() * (retryCount + 1));
                 closeResponse(response);//在这里其实并没有调用finally，因为方法还没有结束，必须手动关闭资源。否则会报错
@@ -65,7 +68,10 @@ public class HttpClientRequests extends HttpRequests implements Requests {
 
         } catch (Exception e) {
             return super.defaultExceptionExecute(method, config, cls, retryCount, e);
-        }finally {
+        } finally {
+            if (cls != CloseableHttpResponse.class) {
+                closeResponse(response);
+            }
             super.restoreDefaultProxyIp(super.proxyIpString);//恢复为默认的代理IP
         }
     }

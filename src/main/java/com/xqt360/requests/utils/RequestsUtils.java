@@ -226,7 +226,7 @@ public class RequestsUtils {
     }
 
 
-    public static boolean needRetry(RetryConfig retryConfig, HttpResponse response, int retryCount, int MAX_RETRY_COUNT) {
+    public static boolean needRetry(RetryConfig retryConfig, CloseableHttpResponse response, int retryCount, int MAX_RETRY_COUNT) {
         if (retryConfig == null || retryConfig.getRetryCondition() == null) {
             return false;
         }

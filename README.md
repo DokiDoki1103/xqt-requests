@@ -27,6 +27,7 @@
 ```
 ### 下载发行版jar包
 下载jar包引入自己的项目依旧可以使用
+
 ## 前言：
 
 - 在开发中自己是否经常写一大堆冗余代码？明明简单的POST、GET请求却需要
@@ -154,7 +155,7 @@ Document document = requests.get("https://baidu.com", Document.class);
 // 当然有时候并不能满足我们的需求，我们可能需要获取http状态码,返回的响应头等，我们可以让他返回Response对象
 Connection.Response response = requests.get("https://baidu.com", Connection.Response.class);
 // 或者我们使用HttpClient时候需要返回HttpResponse对象
-HttpResponse httpResponse = requests.get("https://baidu.com", HttpResponse.class);
+CloseableHttpResponse httpResponse = requests.get("https://baidu.com", CloseableHttpResponse.class);
 ```
 当然您可能传一个我们不支持的类型，我们将会抛出```UnsupportedTypeException```异常，该异常继承自```IllegalArgumentException```并不需要我们显示捕获它，但是我们写代码时应该尽量避免它的出现。
 
@@ -329,10 +330,10 @@ RetryByBody retryByBody = new RetryByBody() {
 //同理直接通过lambda表达式简化
 RetryByBody retryByBody1 = body -> body.contains("机器人验证");//返回的内容重试条件
 //
-//根据HttpClient HttpResponse 类进行重试
+//根据HttpClient CloseableHttpResponse 类进行重试
 RetryByHttpResponse retryByHttpResponse = new RetryByHttpResponse() {//对HttpClient的返回进行判断然后重试
     @Override
-    public boolean shouldRetry(HttpResponse response) {
+    public boolean shouldRetry(CloseableHttpResponse response) {
         //根据response的返回处理您的逻辑，如果需要重试返回true
         return false;
     }

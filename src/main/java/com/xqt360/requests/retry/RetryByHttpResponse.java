@@ -1,10 +1,10 @@
 package com.xqt360.requests.retry;
 
-import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 
 @FunctionalInterface
-public interface RetryByHttpResponse extends RetryCondition<HttpResponse> {
+public interface RetryByHttpResponse extends RetryCondition<CloseableHttpResponse> {
     @Override
-    boolean shouldRetry(HttpResponse response);
+    boolean shouldRetry(CloseableHttpResponse response);
 
 }

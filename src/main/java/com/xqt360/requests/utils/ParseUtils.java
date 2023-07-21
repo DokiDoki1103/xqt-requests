@@ -5,6 +5,7 @@ import com.xqt360.requests.exception.UnsupportedTypeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -48,10 +49,10 @@ public class ParseUtils {
     /**
      * 自动解析Jsoup返回
      */
-    public static <T> T parseResponse(HttpResponse response, Class<T> cls) {
+    public static <T> T parseResponse(CloseableHttpResponse response, Class<T> cls) {
         try {
             // 在这里解析响应，并返回指定类型的对象
-            if (cls == HttpResponse.class) {
+            if (cls == CloseableHttpResponse.class) {
                 return (T) response;
             } else if (cls == JSONObject.class) {
                 String body = EntityUtils.toString(response.getEntity());
