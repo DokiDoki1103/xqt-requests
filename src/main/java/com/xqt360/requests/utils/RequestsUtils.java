@@ -179,18 +179,21 @@ public class RequestsUtils {
     public static <D> void setProxy(Connection connection, RequestConfig<D> config, Proxy defaultProxy) {
         //正确的设置了IP字符串的情况下
         if (config.getProxyString() != null && config.getProxyString().length() > 0) {
-            String[] split = config.getProxyString().split(":");
-            if (split.length == 2) {
-                connection.proxy(split[0], Integer.parseInt(split[1]));//设置代理IP；
+            String[] split = config.getProxyString().split("@");
+            if (split.length == 1) {
+                String[] hostPort = split[0].split(":");
+                connection.proxy(hostPort[0], Integer.parseInt(hostPort[1]));//设置代理IP；
                 return;
-            } else if (split.length == 4) {
+            } else if (split.length == 2) {
+                String[] hostPort = split[0].split(":");
+                String[] rootPassword = split[1].split(":");
                 Authenticator.setDefault(new Authenticator() {
                     @Override
                     public PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(split[2], split[3].toCharArray());
+                        return new PasswordAuthentication(rootPassword[0], rootPassword[1].toCharArray());
                     }
                 });
-                connection.proxy(split[0], Integer.parseInt(split[1]));//设置代理IP；
+                connection.proxy(hostPort[0], Integer.parseInt(hostPort[1]));//设置代理IP；
                 return;
             }
         }

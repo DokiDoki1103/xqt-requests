@@ -33,12 +33,12 @@ public class HttpClientRequests extends HttpRequests implements Requests {
         this.httpClient = RequestsUtils.getHttpsClient("");
     }
 
-    public HttpClientRequests(boolean isHttps, String proxyIp) {
-        this.httpClient = isHttps ? RequestsUtils.getHttpsClient(proxyIp) : RequestsUtils.getHttpClient(proxyIp);
+    public HttpClientRequests(String proxyIp) {
+        this.httpClient = RequestsUtils.getHttpsClient(proxyIp);
     }
 
-    public HttpClientRequests(boolean isHttps, String proxyIp, String username, String password) {
-        this.httpClient = isHttps ? RequestsUtils.getHttpsClient(proxyIp, username, password) : RequestsUtils.getHttpClient(proxyIp, username, password);
+    public HttpClientRequests(String proxyIp, String username, String password) {
+        this.httpClient = RequestsUtils.getHttpsClient(proxyIp, username, password);
     }
 
     static {

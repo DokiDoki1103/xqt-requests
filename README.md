@@ -93,8 +93,8 @@ config.addHeader()
 ```java
 //创建 HttpClient，使用HttpClient发送请求
 Requests requests1 = new HttpClientRequests();
-Requests requests2 = new HttpClientRequests(true,"127.0.0.1:8888");
-Requests requests3 = new HttpClientRequests(false,"127.0.0.1:8888","username","password");
+Requests requests2 = new HttpClientRequests("127.0.0.1:8888");
+Requests requests3 = new HttpClientRequests("127.0.0.1:8888","username","password");
 
 //创建 JsoupRequests，使用Jsoup发送请求
 Requests requests4 = new JsoupRequests();
@@ -253,7 +253,7 @@ private int timeout = 8000;//单位ms
 private String userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
 
 private Proxy proxy;
-private String proxyString;//格式：127.0.0.1:8888:root:password
+private String proxyString;//格式：127.0.0.1:8888@root:password
 private boolean followRedirects = true;//默认支持重定向
 private RetryConfig retryConfig = new RetryConfig();//异常重试配置类
 

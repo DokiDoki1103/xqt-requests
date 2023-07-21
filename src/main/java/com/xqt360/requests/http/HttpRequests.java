@@ -125,12 +125,14 @@ public abstract class HttpRequests implements Requests {
         if (proxyIpString ==null || proxyIpString.isEmpty()){
             return;
         }
-        String[] split = proxyIpString.split(":");
-        if (split.length == 2) {
-            this.setProxyIp(proxyIpString);
-        } else if (split.length == 4) {
-            this.setProxyIp(split[0] + ":" + split[1], split[2], split[3]);
+        String[] split = proxyIpString.split("@");
+        if (split.length == 1){
+            this.setProxyIp(split[0]);
+        }else if (split.length == 2){
+            String[] rootPassword = split[1].split(":");
+            this.setProxyIp(split[0], rootPassword[0], rootPassword[1]);
         }
+
     }
 
     protected <D, T> T defaultExceptionExecute(Connection.Method method, RequestConfig<D> config, Class<T> cls, int retryCount, Exception e) {
