@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     <distributionManagement>
         <repository>
-            <id>releases</id>
-            <url>http://maven.lyck6.cn/repository/maven-releases/</url>
+            <id>rdc-releases</id>
+            <url>https://packages.aliyun.com/maven/repository/2406271-release-nqGqex/</url>
         </repository>
     </distributionManagement>
 

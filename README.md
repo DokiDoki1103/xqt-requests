@@ -16,7 +16,7 @@
     </mirror>
   </mirrors>
 ```
-然后假如maven坐标
+然后加入maven坐标
 ```xml
 <dependency>
   <groupId>com.xqt365.requests</groupId>
