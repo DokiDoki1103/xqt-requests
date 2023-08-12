@@ -132,7 +132,6 @@ public abstract class HttpRequests implements Requests {
             String[] rootPassword = split[1].split(":");
             this.setProxyIp(split[0], rootPassword[0], rootPassword[1]);
         }
-
     }
 
     protected <D, T> T defaultExceptionExecute(Connection.Method method, RequestConfig<D> config, Class<T> cls, int retryCount, Exception e) {
