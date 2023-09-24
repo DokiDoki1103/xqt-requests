@@ -16,7 +16,7 @@
   </snapshots>
 </repository>
 ```
-然后加入maven坐标
+然后在你的```pom.xml```加入maven坐标
 ```xml
 <dependency>
   <groupId>com.xqt365.requests</groupId>
