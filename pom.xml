@@ -3,16 +3,25 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+<!--    <distributionManagement>-->
+<!--        <repository>-->
+<!--            <id>rdc-releases</id>-->
+<!--            <url>https://packages.aliyun.com/maven/repository/2406271-release-nqGqex/</url>-->
+<!--        </repository>-->
+<!--    </distributionManagement>-->
+
     <distributionManagement>
         <repository>
-            <id>rdc-releases</id>
-            <url>https://packages.aliyun.com/maven/repository/2406271-release-nqGqex/</url>
+            <id>github</id>
+            <name>GitHub OWNER Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/lengyue-ck/xqt-requests</url>
         </repository>
     </distributionManagement>
 
+
     <groupId>com.xqt365.requests</groupId>
     <artifactId>xqt-requests</artifactId>
-    <version>1.0.5-RELEASE</version>
+    <version>1.1.0-RELEASE</version>
     <name>小蜻蜓请求库</name>
 
     <properties>

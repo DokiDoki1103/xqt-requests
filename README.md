@@ -1,20 +1,20 @@
-<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">小蜻蜓请求库1.0.5</h1>
+<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">小蜻蜓请求库1.1.0</h1>
 <h4 align="center">一个轻量级 Java HTTP请求框架，让请求变得简单、优雅！</h4>
 
 
 ---
 ## 如何安装：
-### 通过更换maven中央仓库
-如果自己项目中没有其他的私有仓库，可直接将maven的```setting.xml```文件中```mirrors```节点改为，此仓库还代理了阿里云maven仓库``` http://maven.aliyun.com/nexus/content/groups/public ```，可当加速仓库使用
+### 通过设置maven仓库
+您需要定义原始仓库，具体操作为：在您的```profiles```节点下的```profile```节点下的```repositories```新增```repository```
+
 ```xml
-  <mirrors>
-    <mirror>
-      <id>lyck</id>
-      <mirrorOf>central</mirrorOf>
-      <name>private</name>
-      <url>http://maven.lyck6.cn/repository/maven-public/</url>
-    </mirror>
-  </mirrors>
+<repository>
+  <id>github</id>
+  <url>https://maven.pkg.github.com/lengyue-ck/xqt-requests</url>
+  <snapshots>
+    <enabled>true</enabled>
+  </snapshots>
+</repository>
 ```
 然后加入maven坐标
 ```xml
