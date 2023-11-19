@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @NoArgsConstructor
+
 public class RetryConfig {
     //只有能正常请求通过对方才会走此重试条件包括 503、403 状态码均视为请求通过
     private RetryCondition retryCondition;//重试条件；默认null即没有发生异常的情况下不重试

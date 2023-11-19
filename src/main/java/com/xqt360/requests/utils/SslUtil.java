@@ -32,13 +32,10 @@ public class SslUtil {
 
         @Override
         public void checkServerTrusted(X509Certificate[] certs, String authType) {
-            return;
         }
 
         @Override
-        public void checkClientTrusted(X509Certificate[] certs, String authType)
-                throws CertificateException {
-            return;
+        public void checkClientTrusted(X509Certificate[] certs, String authType) {
         }
     }
 

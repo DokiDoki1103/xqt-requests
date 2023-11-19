@@ -117,13 +117,11 @@ config.addHeader()
 ```java
 //创建 HttpClient，使用HttpClient发送请求
 Requests requests1 = new HttpClientRequests();
-Requests requests2 = new HttpClientRequests("127.0.0.1:8888");
-Requests requests3 = new HttpClientRequests("127.0.0.1:8888","username","password");
+Requests requests2 = new HttpClientRequests("127.0.0.1:8888@username:password");
 
 //创建 JsoupRequests，使用Jsoup发送请求
-Requests requests4 = new JsoupRequests();
-Requests requests5 = new JsoupRequests("127.0.0.1:8888");
-Requests requests6 = new JsoupRequests("127.0.0.1:8888","username","password");
+Requests requests3 = new JsoupRequests();
+Requests requests6 = new JsoupRequests("127.0.0.1:8888@username:password");
 ```
 ### 发送get请求
 Requests接口有如下方法可供调用

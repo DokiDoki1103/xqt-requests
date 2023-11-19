@@ -1,5 +1,6 @@
 package com.xqt360.requests.http;
 
+import com.xqt360.requests.config.ProxyConfig;
 import com.xqt360.requests.config.RequestConfig;
 import com.xqt360.requests.config.RetryConfig;
 import com.xqt360.requests.interceptors.RequestInterceptor;
@@ -17,7 +18,7 @@ import org.jsoup.Connection;
 @NoArgsConstructor
 public abstract class HttpRequests implements Requests {
     protected final int MAX_RETRY_COUNT = 20;// 防止递归或者其他意外错误，最大重试次数
-    protected String proxyIpString;//格式：127.0.0.1:8888:root:password
+    protected ProxyConfig proxyConfig;
 
     /**
      * 默认的请求拦截器。拦截RequestConfig
@@ -37,7 +38,6 @@ public abstract class HttpRequests implements Requests {
             return response;
         }
     };
-
 
     protected abstract <D, T> T execute(Connection.Method method, RequestConfig<D> config, Class<T> cls, int retryCount);
 
@@ -113,25 +113,14 @@ public abstract class HttpRequests implements Requests {
     }
 
     @Override
-    public abstract void setProxyIp(String proxyIp);
+    public abstract void setProxyIp(ProxyConfig proxyConfig);//格式：127.0.0.1:8888@root:password
 
-    @Override
-    public abstract void setProxyIp(String proxyIp, String username, String password);
 
     /**
      * 恢复默认代理IP，因为每个请求会更改可能会代理ip
      */
-    protected void restoreDefaultProxyIp(String proxyIpString) {
-        if (proxyIpString ==null || proxyIpString.isEmpty()){
-            return;
-        }
-        String[] split = proxyIpString.split("@");
-        if (split.length == 1){
-            this.setProxyIp(split[0]);
-        }else if (split.length == 2){
-            String[] rootPassword = split[1].split(":");
-            this.setProxyIp(split[0], rootPassword[0], rootPassword[1]);
-        }
+    protected void restoreDefaultProxyIp(ProxyConfig proxyConfig) {
+        this.setProxyIp(proxyConfig);
     }
 
     protected <D, T> T defaultExceptionExecute(Connection.Method method, RequestConfig<D> config, Class<T> cls, int retryCount, Exception e) {

@@ -1,16 +1,17 @@
 package com.xqt360.requests.http.impl;
 
+import com.xqt360.requests.config.ProxyConfig;
 import com.xqt360.requests.config.RequestConfig;
 import com.xqt360.requests.config.RetryConfig;
 import com.xqt360.requests.http.HttpRequests;
 import com.xqt360.requests.utils.ParseUtils;
+import com.xqt360.requests.utils.ProxyUtils;
 import com.xqt360.requests.utils.RequestsUtils;
 import com.xqt360.requests.utils.SslUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
@@ -18,8 +19,6 @@ import java.net.Authenticator;
 import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 
@@ -28,6 +27,7 @@ import java.util.Optional;
 @Data
 @NoArgsConstructor
 public class JsoupRequests extends HttpRequests {
+
     private final Connection session = Jsoup.newSession()
             .maxBodySize(1024 * 1024 * 1024)
             .ignoreContentType(true)
@@ -36,16 +36,17 @@ public class JsoupRequests extends HttpRequests {
     //是否设置代理IP
     private Proxy proxy = null;
 
-    public JsoupRequests(String proxyIp) {
-        this.setProxyIp(proxyIp);
+    public JsoupRequests(String proxyIpString) {
+        ProxyConfig proxyConfig = ProxyUtils.formatProxyString(proxyIpString);
+        super.setProxyConfig(proxyConfig);
+        this.setProxyIp(proxyConfig);
     }
 
-    public JsoupRequests(String proxyIp, String username, String password) {
-        this.setProxyIp(proxyIp, username, password);
-    }
+
     static {
         SslUtil.ignoreSsl();
     }
+
     @Override
     protected <D, T> T execute(Connection.Method method, RequestConfig<D> config, Class<T> cls, int retryCount) {
         try {
@@ -55,14 +56,12 @@ public class JsoupRequests extends HttpRequests {
 
             Connection connection = session.newRequest()
                     .url(RequestsUtils.getUrl(config))
-
                     .method(method)
                     .followRedirects(config.isFollowRedirects())
-
                     .timeout(config.getTimeout());
-           if (config.getCookies()!=null){
-               config.getCookies().forEach(connection::cookie);
-           }
+            if (config.getCookies() != null) {
+                config.getCookies().forEach(connection::cookie);
+            }
 
             RequestsUtils.setProxy(connection, config, this.proxy);//设置代理，优先设置请求配置类的代理
             RequestsUtils.setDefaultHeadersAndBody(config, method, connection);//设置默认请求头和发送的数据
@@ -74,38 +73,29 @@ public class JsoupRequests extends HttpRequests {
                 Thread.sleep((long) retryConfig.getDelay() * (retryCount + 1));
                 return execute(method, config, cls, retryCount + 1);
             }
-            // 自动携带此次请求官方返回的Cookie
-//            cookiesStore.putAll(response.cookies());
-            // 对返回内容的解析为用户指定的格式，如果不指定，那么将会返回默认的String格式，
-            // 如果需要拿到http响应头信息，请指定为 Connection.Response 类型
-            T t = ParseUtils.parseResponse(response, cls);
-
-            return super.responseInterceptor.use(t);
+            return super.responseInterceptor.use(ParseUtils.parseResponse(response, cls));
         } catch (Exception e) {
             e.printStackTrace();
             return super.defaultExceptionExecute(method, config, cls, retryCount, e);
         } finally {
-            super.restoreDefaultProxyIp(super.proxyIpString);//恢复为默认的代理IP
+            super.restoreDefaultProxyIp(super.proxyConfig);//恢复为默认的代理IP
         }
     }
 
     @Override
-    public void setProxyIp(String proxyIp) {
-        super.setProxyIpString(proxyIp);
-        String[] split = proxyIp.split(":");
-        this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(split[0], Integer.parseInt(split[1])));
-    }
+    public void setProxyIp(ProxyConfig proxyConfig) {
+        if (proxyConfig == null) {
+            return;
+        }
+        this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyConfig.getHost(), proxyConfig.getPort()));
 
-
-    @Override
-    public void setProxyIp(String proxyIp, String username, String password) {
-        super.setProxyIpString(proxyIp + ":" + username + ":" + password);
-        Authenticator.setDefault(new Authenticator() {
-            @Override
-            public PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(username, password.toCharArray());
-            }
-        });
-        setProxyIp(proxyIp);
+        if (proxyConfig.getUsername() != null && !proxyConfig.getUsername().isEmpty()) {
+            Authenticator.setDefault(new Authenticator() {
+                @Override
+                public PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(proxyConfig.getUsername(), proxyConfig.getPassword().toCharArray());
+                }
+            });
+        }
     }
 }

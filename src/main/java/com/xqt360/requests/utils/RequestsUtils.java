@@ -3,6 +3,7 @@ package com.xqt360.requests.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.xqt360.requests.config.ProxyConfig;
 import com.xqt360.requests.config.RequestConfig;
 import com.xqt360.requests.config.RetryConfig;
 import com.xqt360.requests.exception.RetryException;
@@ -284,12 +285,9 @@ public class RequestsUtils {
         }
     }
 
-    public static DefaultHttpClient getHttpsClient(String proxyIp) {
-        return getHttpsClient(proxyIp, "test", "test123!@#");
-    }
 
 
-    public static DefaultHttpClient getHttpsClient(String proxyIp, String username, String password) {
+    public static DefaultHttpClient getHttpsClient(ProxyConfig proxyConfig) {
 
         DefaultHttpClient client = new DefaultHttpClient(new ThreadSafeClientConnManager());
         try {
@@ -325,50 +323,19 @@ public class RequestsUtils {
             client.getParams().setParameter(CoreConnectionPNames.SO_KEEPALIVE, true);
             client.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
 
-            if (proxyIp == null || proxyIp.isEmpty()) {
+            if (proxyConfig == null) {
                 return client;
             }
-            String[] ippool = proxyIp.split(":");
-            HttpHost proxy = new HttpHost(ippool[0], Integer.parseInt(ippool[1]), "http");
+
+            HttpHost proxy = new HttpHost(proxyConfig.getHost(), proxyConfig.getPort(), "http");
             client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
-            AuthScope auth = new AuthScope(ippool[0], Integer.parseInt(ippool[1]));
-            Credentials credentials = new org.apache.http.auth.NTCredentials(username, password, "", "");
+            AuthScope auth = new AuthScope(proxyConfig.getHost(), proxyConfig.getPort() );
+            Credentials credentials = new org.apache.http.auth.NTCredentials(proxyConfig.getUsername(), proxyConfig.getPassword(), "", "");
             client.getCredentialsProvider().setCredentials(auth, credentials);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return client;
-    }
-
-    public static DefaultHttpClient getHttpClient(String proxyIp) {
-        return getHttpClient(proxyIp, "test", "test123!@#");
-
-    }
-
-    public static DefaultHttpClient getHttpClient(String proxyIp, String username, String password) {
-
-        DefaultHttpClient client = new DefaultHttpClient(new ThreadSafeClientConnManager());
-        LaxRedirectStrategy redirectStrategy = new LaxRedirectStrategy();
-        client.setRedirectStrategy(redirectStrategy);
-
-        client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 40000);
-        client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 60000);
-
-
-        client.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
-
-        if (proxyIp == null || proxyIp.isEmpty()) {
-            return client;
-        }
-
-        String[] ippool = proxyIp.split(":");
-        HttpHost proxy = new HttpHost(ippool[0], Integer.parseInt(ippool[1]), "http");
-        client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
-        AuthScope auth = new AuthScope(ippool[0], Integer.parseInt(ippool[1]));
-        Credentials credentials = new org.apache.http.auth.NTCredentials(username, password, "", "");
-        client.getCredentialsProvider().setCredentials(auth, credentials);
-
         return client;
     }
 }

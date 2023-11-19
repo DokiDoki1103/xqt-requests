@@ -1,10 +1,12 @@
 package com.xqt360.requests.http.impl;
 
+import com.xqt360.requests.config.ProxyConfig;
 import com.xqt360.requests.config.RequestConfig;
 import com.xqt360.requests.config.RetryConfig;
 import com.xqt360.requests.http.HttpRequests;
 import com.xqt360.requests.http.Requests;
 import com.xqt360.requests.utils.ParseUtils;
+import com.xqt360.requests.utils.ProxyUtils;
 import com.xqt360.requests.utils.RequestsUtils;
 import com.xqt360.requests.utils.SslUtil;
 import lombok.Data;
@@ -30,16 +32,16 @@ public class HttpClientRequests extends HttpRequests implements Requests {
     private DefaultHttpClient httpClient;
 
     public HttpClientRequests() {
-        this.httpClient = RequestsUtils.getHttpsClient("");
+        this.httpClient = RequestsUtils.getHttpsClient(proxyConfig);
     }
 
-    public HttpClientRequests(String proxyIp) {
-        this.httpClient = RequestsUtils.getHttpsClient(proxyIp);
+    public HttpClientRequests(String proxyIpString) {
+        ProxyConfig proxyConfig = ProxyUtils.formatProxyString(proxyIpString);
+        super.setProxyConfig(proxyConfig);
+        this.httpClient = RequestsUtils.getHttpsClient(proxyConfig);
     }
 
-    public HttpClientRequests(String proxyIp, String username, String password) {
-        this.httpClient = RequestsUtils.getHttpsClient(proxyIp, username, password);
-    }
+
 
     static {
         SslUtil.ignoreSsl();
@@ -50,9 +52,9 @@ public class HttpClientRequests extends HttpRequests implements Requests {
         super.requestInterceptor.use(config);
         HttpUriRequest httpUriRequest = RequestsUtils.createRequest(config, method, httpClient);
 
-        super.restoreDefaultProxyIp(config.getProxyString());//设置代理IP
         CloseableHttpResponse response = null;
         try {
+            this.setProxyIp(ProxyUtils.formatProxyString(config.getProxyString()));//此此请求用的代理IP
             response = httpClient.execute(httpUriRequest);
             log.info("{} {} 请求 {}", method.name(), response.getStatusLine().getStatusCode(), config.getUrl());
             RetryConfig retryConfig = config.getRetryConfig();
@@ -62,9 +64,7 @@ public class HttpClientRequests extends HttpRequests implements Requests {
                 closeResponse(response);//在这里其实并没有调用finally，因为方法还没有结束，必须手动关闭资源。否则会报错
                 return execute(method, config, cls, retryCount + 1);
             }
-            T t = ParseUtils.parseResponse(response, cls);
-
-            return super.responseInterceptor.use(t);
+            return super.responseInterceptor.use(ParseUtils.parseResponse(response, cls));
 
         } catch (Exception e) {
             return super.defaultExceptionExecute(method, config, cls, retryCount, e);
@@ -72,27 +72,22 @@ public class HttpClientRequests extends HttpRequests implements Requests {
             if (cls != CloseableHttpResponse.class) {
                 closeResponse(response);
             }
-            super.restoreDefaultProxyIp(super.proxyIpString);//恢复为默认的代理IP
+            super.restoreDefaultProxyIp(super.proxyConfig);//恢复为默认的代理IP
         }
     }
 
     @Override
-    public void setProxyIp(String proxyIp) {
-        setProxyIp(proxyIp, "", "");
-    }
-
-    @Override
-    public void setProxyIp(String proxyIp, String username, String password) {
-        String[] split = proxyIp.split(":");
-        String proxyHost = split[0];
-        int proxyPort = Integer.parseInt(split[1]);
-
-        HttpHost proxy = new HttpHost(proxyHost, proxyPort, "http");
+    public void setProxyIp(ProxyConfig proxyConfig) {
+        if (proxyConfig == null){
+            return;
+        }
+        HttpHost proxy = new HttpHost(proxyConfig.getHost(), proxyConfig.getPort(), "http");
         httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
-        AuthScope auth = new AuthScope(proxyHost, proxyPort);
-        Credentials credentials = new org.apache.http.auth.NTCredentials(username, password, "", "");
+        AuthScope auth = new AuthScope(proxyConfig.getHost(), proxyConfig.getPort());
+        Credentials credentials = new org.apache.http.auth.NTCredentials(proxyConfig.getUsername(), proxyConfig.getPassword(), "", "");
         httpClient.getCredentialsProvider().setCredentials(auth, credentials);
     }
+
 
     // 关闭response
     private void closeResponse(CloseableHttpResponse response) {

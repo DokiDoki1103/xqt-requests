@@ -36,7 +36,7 @@ public class RequestConfig<D> {
     private String userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
 
     private Proxy proxy;
-    private String proxyString;//格式：127.0.0.1:8888:root:password
+    private String proxyString;//格式：127.0.0.1:8888@root:password
     private boolean followRedirects = true;//默认支持重定向
     private RetryConfig retryConfig = new RetryConfig();//异常重试配置类
 
